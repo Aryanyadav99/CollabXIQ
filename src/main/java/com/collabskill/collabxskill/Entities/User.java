@@ -40,11 +40,12 @@ public class User {
     @JsonIgnore
     private UserProfile userProfile;
 
-    private boolean Admin=false;
 
-    private boolean Verified=false;
+    private boolean isAdmin=false;
 
-    private  boolean Banned=false;
+    private boolean isVerified=false;
+
+    private  boolean isBanned=false;
 
     private LocalDateTime updatedAt;
 
