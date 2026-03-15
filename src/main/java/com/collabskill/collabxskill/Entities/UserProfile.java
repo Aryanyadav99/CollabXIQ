@@ -1,6 +1,8 @@
 package com.collabskill.collabxskill.Entities;
 
+import com.collabskill.collabxskill.extra.ExperienceLevel;
 import com.collabskill.collabxskill.extra.Gender;
+import com.collabskill.collabxskill.extra.PrimaryDomain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +11,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -42,15 +42,18 @@ public class UserProfile {
     @Column(length = 1000)
     private String bio;
 
-
-    private String experienceLevel;
+    @Enumerated(EnumType.STRING)
+    private ExperienceLevel experienceLevel;
     // Beginner / Intermediate / Advanced
 
-    private String primaryDomain;
+    @Enumerated(EnumType.STRING)
+    private PrimaryDomain primaryDomain;
     // Backend, Frontend, AI, Blockchain, DSA etc.
 
+    @ElementCollection
+    //hibernate will create a separate table to store the list of tech stack for each user profile
     private List<String> techStack;
-    // which techstack are you using like put nodejs,react,springboot etc
+    // which tech stack are you using like put Node.js,react,springboot etc
 
     private String githubUrl;
 

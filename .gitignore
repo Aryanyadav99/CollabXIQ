@@ -1,4 +1,6 @@
 HELP.md
+CODE_SNIPPETS.md
+LEARNING_GUIDE.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
