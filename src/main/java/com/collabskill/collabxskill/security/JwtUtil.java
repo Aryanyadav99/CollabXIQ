@@ -13,13 +13,13 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
+    @Value("${spring.app.jwtSecret}")
     private String secret;
 
-    @Value("${security.jwt.access-expiration-ms}")
+    @Value("${spring.app.jwtExpirationMs}")
     private long accessExp;
 
-    @Value("${security.jwt.refresh-expiration-ms}")
+    @Value("${spring.app.jwtRefreshMs}")
     private long refreshExp;
 
 
