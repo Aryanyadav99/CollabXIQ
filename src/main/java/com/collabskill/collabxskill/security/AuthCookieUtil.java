@@ -17,6 +17,18 @@ public class AuthCookieUtil {
     @Value("${security.cookie.refresh-max-age}")
     private int refreshCookieMaxAge;
 
+    public void setRefreshTokenCookie(HttpServletResponse response,String refreshToken){
+        Cookie cookie=new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        // need to see if this should be /api/users or just /
+        cookie.setPath("/");
+        cookie.setMaxAge(refreshCookieMaxAge);
+
+        cookie.setAttribute("SameSite", cookieSameSiteAttribute);
+        response.addCookie(cookie);
+    }
+
     String cookieSameSiteAttribute = Constants.SAME_SITE_ATTRIBUTE;
     public void setAccessTokenCookie(HttpServletResponse response, String accessToken){
         Cookie cookie =new Cookie("accessToken", accessToken);
@@ -28,16 +40,7 @@ public class AuthCookieUtil {
         response.addCookie(cookie);
     }
 
-    public void setRefreshCookie(HttpServletResponse response,String refreshToken){
-        Cookie cookie=new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/users");
-        cookie.setMaxAge(refreshCookieMaxAge);
 
-        cookie.setAttribute("SameSite", cookieSameSiteAttribute);
-        response.addCookie(cookie);
-    }
 
     public void clearAuthCookies(HttpServletResponse response) {
        Cookie access=new Cookie("accessToken", null);
