@@ -1,6 +1,7 @@
 
 package com.collabskill.collabxskill.io;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,14 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponseDTO {
-    private String userId;
-    private String firstName;
-    private String lastName;
+    private String id;
     private String email;
-    private String phoneNumber;
-    private String profileImageUrl;
-    private boolean active;
-    private String createdAt;
-    private String updatedAt;
-    private List<SkillDTO> skills;
+    @JsonProperty("isAdmin")
+    private boolean isAdmin;
+    @JsonProperty("isVerified")
+    private boolean isVerified;
+    @JsonProperty("isBanned")
+    private boolean isBanned;
 }
