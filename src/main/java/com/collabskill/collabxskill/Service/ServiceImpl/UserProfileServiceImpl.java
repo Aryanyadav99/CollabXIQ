@@ -11,6 +11,7 @@ import com.collabskill.collabxskill.repo.UserProfileRepo;
 import com.collabskill.collabxskill.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     private final UserRepository userRepository;
     private final UserProfileRepo userProfileRepository;
+    private final ModelMapper modelMapper;
     @Override
     public void saveUserProfileWithRandomImage(UserProfile profile) throws IOException {
 
@@ -84,6 +86,17 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         userProfileRepository.save(profile);
     }
+
+    @Override
+    public UserProfileDTO getUserProfileById(String userId) {
+        Optional<UserProfile> userProfile= userProfileRepository.findByUserId(userId);
+        if(userProfile.isEmpty()){
+            return null;
+        }
+        UserProfile profile=userProfile.get();
+        return modelMapper.map(profile,UserProfileDTO.class);
+    }
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 

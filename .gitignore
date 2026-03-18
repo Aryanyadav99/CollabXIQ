@@ -1,7 +1,9 @@
 HELP.md
 CODE_SNIPPETS.md
 LEARNING_GUIDE.md
+uploads
 target/
+
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

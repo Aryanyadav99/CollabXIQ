@@ -9,4 +9,6 @@ import java.io.IOException;
 public interface UserProfileService {
     void saveUserProfileWithRandomImage(UserProfile profile) throws IOException;
     void saveProfile(UserProfileDTO profile, MultipartFile photo, String userId);
+
+    UserProfileDTO getUserProfileById(String userId);
 }

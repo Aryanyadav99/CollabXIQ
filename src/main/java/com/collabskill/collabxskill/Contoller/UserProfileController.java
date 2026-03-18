@@ -8,14 +8,12 @@ import com.collabskill.collabxskill.extra.UserProfileDTO;
 import com.collabskill.collabxskill.io.UserResponseDTO;
 import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -69,5 +67,26 @@ public class UserProfileController {
         }
         userProfileService.saveProfile(userProfile, photo, currentUserDTO.getId());
         return ResponseEntity.ok(Map.of("message", "Profile saved successfully"));
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserProfile(@PathVariable  String userId){
+        UserResponseDTO userDto=userService.getUserById(userId);
+        UserResponseDTO currentUserDto=securityUtil.getCurrentUserDto();
+        if(userDto!=null && currentUserDto!=null){
+            if(!(userDto.getId().equals(currentUserDto.getId()))){
+                throw  new ResponseStatusException(HttpStatus.FORBIDDEN,Constants.ACCESS_DENIED);
+            }
+        }
+        else{
+            return ResponseEntity.notFound().build();
+        }
+        UserProfileDTO userProfileDTO=userProfileService.getUserProfileById(userId);
+        if(userProfileDTO!=null){
+            return ResponseEntity.ok(userProfileDTO);
+        }
+        else{
+            return ResponseEntity.notFound().build();
+        }
     }
 }
