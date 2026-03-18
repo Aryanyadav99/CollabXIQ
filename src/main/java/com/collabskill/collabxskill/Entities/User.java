@@ -40,12 +40,15 @@ public class User {
     @JsonIgnore
     private UserProfile userProfile;
 
+    // BAAD MEIN — change kar aise
+    @Column(name = "is_admin", nullable = false, columnDefinition = "boolean default false")
+    private boolean isAdmin = false;
 
-    private boolean isAdmin=false;
+    @Column(name = "is_verified", nullable = false, columnDefinition = "boolean default false")
+    private boolean isVerified = false;
 
-    private boolean isVerified=false;
-
-    private  boolean isBanned=false;
+    @Column(name = "is_banned", nullable = false, columnDefinition = "boolean default false")
+    private boolean isBanned = false;
 
     private LocalDateTime updatedAt;
 

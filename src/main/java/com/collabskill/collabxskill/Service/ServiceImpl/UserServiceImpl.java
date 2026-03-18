@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = userOptional.get();
         // Here you should verify the OTP. This is a placeholder for OTP verification logic.
-        if(user.getOtp().equals(otp)){
+        if(!user.getOtp().equals(otp)){
             return null;
         }
         user.setPassword(passwordEncoder.encode(newPassword));

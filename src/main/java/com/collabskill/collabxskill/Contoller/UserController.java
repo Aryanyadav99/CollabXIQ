@@ -77,7 +77,7 @@ public class UserController {
         }
 
         // Check password
-        if (!userService.verifyPassword(email,password)) {
+        if (!userService.verifyPassword(password, email)) {
             clearAuthCookies(resp);
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Invalid email or password");
         }
