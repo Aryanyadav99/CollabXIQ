@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
         if(user.getOtp().equals(otp)){
             return null;
         }
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setOtp(null);
         user.setTokenVersion(user.getTokenVersion()+1);
         return saveUser(user);
