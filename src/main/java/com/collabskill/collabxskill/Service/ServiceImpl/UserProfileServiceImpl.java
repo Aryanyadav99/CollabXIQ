@@ -9,6 +9,7 @@ import com.collabskill.collabxskill.extra.PrimaryDomain;
 import com.collabskill.collabxskill.extra.UserProfileDTO;
 import com.collabskill.collabxskill.repo.UserProfileRepo;
 import com.collabskill.collabxskill.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -23,8 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     }
 
+    @Transactional
     @Override
     public void saveProfile(UserProfileDTO profileDTO, MultipartFile photo, String userId) {
         User userEntity = userRepository.findById(userId)
@@ -95,6 +97,56 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
         UserProfile profile=userProfile.get();
         return modelMapper.map(profile,UserProfileDTO.class);
+    }
+
+    @Override
+    public List<UserProfileDTO> getOtherProfiles(String id, int limit) {
+        Optional<UserProfile> profile=userProfileRepository.findByUserId(id);
+        if(profile.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Create your profile first to explore others");
+        }
+        List<UserProfile> allProfiles = userProfileRepository.findAll();
+        return allProfiles.stream()
+                .filter(p -> !p.getUser().getId().equals(id))
+                .sorted(Comparator.comparingDouble(other ->
+                        -calculateScore(profile, other)))
+                .limit(limit)
+                .map(profiles -> modelMapper.map(profiles, UserProfileDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    private double calculateScore(Optional<UserProfile> current1, UserProfile other) {
+        double score = 0;
+        if(current1.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Create your profile first to explore others");
+        }
+        UserProfile current=current1.get();
+        // 1. Domain — 40 pts
+        if (current.getPrimaryDomain() != null && other.getPrimaryDomain() != null) {
+            if (current.getPrimaryDomain() == other.getPrimaryDomain()) {
+                score += 40;
+            }
+        }
+
+        // 2. TechStack — 10 pts per match
+        if (current.getTechStack() != null && other.getTechStack() != null) {
+            long commonCount = current.getTechStack().stream()
+                    .filter(t -> other.getTechStack().stream()
+                            .anyMatch(ot -> ot.equalsIgnoreCase(t)))
+                    .count();
+            score += commonCount * 10;
+        }
+
+        // 3. Experience — 20 pts same, 10 pts different
+        if (current.getExperienceLevel() != null && other.getExperienceLevel() != null) {
+            if (current.getExperienceLevel() == other.getExperienceLevel()) {
+                score += 20;
+            } else {
+                score += 10;
+            }
+        }
+
+        return score;
     }
 
     @Value("${file.upload-dir}")

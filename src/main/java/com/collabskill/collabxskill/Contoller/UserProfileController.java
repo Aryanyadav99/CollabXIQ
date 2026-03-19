@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -88,5 +89,23 @@ public class UserProfileController {
         else{
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("/explore")
+    public ResponseEntity<?> getOthersProfile(@RequestParam(defaultValue = "10")int limit){
+        // get the current user
+        UserResponseDTO currentUserDto=securityUtil.getCurrentUserDto();
+        if(currentUserDto==null){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,Constants.ACCESS_DENIED);
+        }
+        //fetch current user profile
+        UserProfileDTO currentUserProfile=userProfileService.getUserProfileById(currentUserDto.getId());
+        if(currentUserProfile==null){
+            return ResponseEntity.badRequest().body("Create your profile first to explore others");
+        }
+        if(currentUserProfile.getPrimaryDomain()==null){
+            return ResponseEntity.badRequest().body("Set your primary domain First");
+        }
+        List<UserProfileDTO> userProfileDTOList=userProfileService.getOtherProfiles(currentUserProfile.getId(), limit);
+        return ResponseEntity.ok(userProfileDTOList);
     }
 }
