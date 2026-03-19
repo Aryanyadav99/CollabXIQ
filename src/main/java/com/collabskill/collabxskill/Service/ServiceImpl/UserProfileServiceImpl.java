@@ -108,6 +108,8 @@ public class UserProfileServiceImpl implements UserProfileService {
         List<UserProfile> allProfiles = userProfileRepository.findAll();
         return allProfiles.stream()
                 .filter(p -> !p.getUser().getId().equals(id))
+                // TODO: filter block user — UserAction module ke baad
+                // TODO: filter friends — UserAction module ke baad
                 .sorted(Comparator.comparingDouble(other ->
                         -calculateScore(profile, other)))
                 .limit(limit)
