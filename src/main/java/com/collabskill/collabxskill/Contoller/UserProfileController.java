@@ -22,7 +22,7 @@ import java.time.Period;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/api/userProfiles")
 @RequiredArgsConstructor
 public class UserProfileController {
@@ -105,7 +105,7 @@ public class UserProfileController {
         if(currentUserProfile.getPrimaryDomain()==null){
             return ResponseEntity.badRequest().body("Set your primary domain First");
         }
-        List<UserProfileDTO> userProfileDTOList=userProfileService.getOtherProfiles(currentUserProfile.getId(), limit);
+        List<UserProfileDTO> userProfileDTOList=userProfileService.getOtherProfiles(currentUserDto.getId(), limit);
         return ResponseEntity.ok(userProfileDTOList);
     }
 }
