@@ -23,6 +23,9 @@ public class UserAction {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    // i am making this message field for the superCollab (if user really want that person in interview,hackathon,project then send the SuperCollab with that message that show the need and urgency)
+    @Column(length = 500)
+    private String message;
     // User who performs the action
     @ManyToOne
     private User fromUser;
