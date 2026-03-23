@@ -114,7 +114,7 @@ public class UserActionServiceImpl implements UserActionService {
                         List.of(ActionType.COLLAB, ActionType.SUPER_COLLAB),
                         PageRequest.of(page, size));
 
-        actions.stream()
+        return actions.stream()
                 .map(action -> {
                     CollabReceivedDTO dto = new CollabReceivedDTO();
                     UserProfile profile = action.getFromUser().getUserProfile();
@@ -127,6 +127,32 @@ public class UserActionServiceImpl implements UserActionService {
                 .sorted(Comparator.comparing(dto ->
                         dto.getActionType().equals("SUPER_COLLAB") ? 0 : 1)) // first  SUPER_COLLAB
                 .toList();
+    }
+    @Override
+    public List<CollabReceivedDTO> getCollabSent(String userId, int page, int size) {
+
+        List<UserAction> actions = userActionRepository
+                .findByFromUser_IdAndActionTypeIn(
+                        userId,
+                        List.of(ActionType.COLLAB, ActionType.SUPER_COLLAB),
+                        PageRequest.of(page, size));
+
+        return actions.stream()
+                .map(action -> {
+                    CollabReceivedDTO dto = new CollabReceivedDTO();
+
+                    // toUser ka profile — jisko tune bheja
+                    UserProfile profile = action.getToUser().getUserProfile();
+                    dto.setProfile(modelMapper.map(profile, UserProfileDTO.class));
+
+                    dto.setActionType(action.getActionType().name());
+                    dto.setMessage(action.getMessage());
+                    dto.setCreatedAt(action.getCreatedAt());
+                    return dto;
+                })
+                .sorted(Comparator.comparing(dto ->
+                        dto.getActionType().equals("SUPER_COLLAB") ? 0 : 1))
+                .collect(Collectors.toList());
     }
 
     private boolean checkMatch(String fromUserId, String toUserId) {
@@ -160,6 +186,5 @@ public class UserActionServiceImpl implements UserActionService {
 
         return false; // wait for response :
     }
-
 
 }

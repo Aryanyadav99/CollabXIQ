@@ -23,4 +23,6 @@ public interface UserActionRepository extends JpaRepository<UserAction, Long> {
     boolean existsByFromUser_IdAndToUser_IdAndActionTypeIn(String toUserId, String fromUserId, List<ActionType> collab);
 
     List<UserAction> findByToUser_IdAndActionTypeIn(String userId, List<ActionType> collab, PageRequest of);
+
+    List<UserAction> findByFromUser_IdAndActionTypeIn(String userId, List<ActionType> collab, PageRequest of);
 }
