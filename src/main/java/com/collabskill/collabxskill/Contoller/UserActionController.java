@@ -29,5 +29,18 @@ public class UserActionController {
         Map<String,String>response=userActionService.handleSwipeAction(userResponseDTO.getId(),toUserId,Action,message);
         return null;
     }
+    @GetMapping("/received")
+    public ResponseEntity<?> getCollabReceived(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
+        UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Login karo pehle");
+        }
+
+        return ResponseEntity.ok(
+                userActionService.getCollabReceived(currentUser.getId(), page, size));
+    }
 }

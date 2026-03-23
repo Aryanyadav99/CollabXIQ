@@ -2,6 +2,7 @@ package com.collabskill.collabxskill.repo;
 
 import com.collabskill.collabxskill.Entities.UserAction;
 import com.collabskill.collabxskill.extra.ActionType;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -20,4 +21,6 @@ public interface UserActionRepository extends JpaRepository<UserAction, Long> {
     boolean existsByFromUser_IdAndToUser_IdAndActionType(String toUserId, String fromUserId, ActionType actionType);
 
     boolean existsByFromUser_IdAndToUser_IdAndActionTypeIn(String toUserId, String fromUserId, List<ActionType> collab);
+
+    List<UserAction> findByToUser_IdAndActionTypeIn(String userId, List<ActionType> collab, PageRequest of);
 }

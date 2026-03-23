@@ -2,26 +2,39 @@ package com.collabskill.collabxskill.Service.ServiceImpl;
 
 import com.collabskill.collabxskill.Entities.User;
 import com.collabskill.collabxskill.Entities.UserAction;
+import com.collabskill.collabxskill.Entities.UserProfile;
 import com.collabskill.collabxskill.Service.UserActionService;
+import com.collabskill.collabxskill.Service.extra.CollabReceivedDTO;
 import com.collabskill.collabxskill.extra.ActionType;
+import com.collabskill.collabxskill.extra.UserProfileDTO;
+import com.collabskill.collabxskill.io.UserResponseDTO;
 import com.collabskill.collabxskill.repo.UserActionRepository;
 import com.collabskill.collabxskill.repo.UserRepository;
+import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserActionServiceImpl implements UserActionService {
     private final UserRepository userRepository;
     private final UserActionRepository userActionRepository;
-
+    private final ModelMapper  modelMapper;
     @Override
     public Map<String, String> handleSwipeAction(String fromUserId, String toUserId, String actionType, String message) {
         User fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new RuntimeException("User not found"));
@@ -92,6 +105,30 @@ public class UserActionServiceImpl implements UserActionService {
         return Map.of("message", action + " successful");
     }
 
+    @Override
+    public List<CollabReceivedDTO> getCollabReceived(String userId, int page, int size) {
+
+        List<UserAction> actions = userActionRepository
+                .findByToUser_IdAndActionTypeIn(
+                        userId,
+                        List.of(ActionType.COLLAB, ActionType.SUPER_COLLAB),
+                        PageRequest.of(page, size));
+
+        actions.stream()
+                .map(action -> {
+                    CollabReceivedDTO dto = new CollabReceivedDTO();
+                    UserProfile profile = action.getFromUser().getUserProfile();
+                    dto.setProfile(modelMapper.map(profile, UserProfileDTO.class));
+                    dto.setActionType(action.getActionType().name());
+                    dto.setMessage(action.getMessage());
+                    dto.setCreatedAt(action.getCreatedAt());
+                    return dto;
+                })
+                .sorted(Comparator.comparing(dto ->
+                        dto.getActionType().equals("SUPER_COLLAB") ? 0 : 1)) // first  SUPER_COLLAB
+                .toList();
+    }
+
     private boolean checkMatch(String fromUserId, String toUserId) {
 
         // Kya samne wale ne bhi COLLAB ya SUPER_COLLAB kiya hai?
@@ -123,4 +160,6 @@ public class UserActionServiceImpl implements UserActionService {
 
         return false; // wait for response :
     }
+
+
 }
