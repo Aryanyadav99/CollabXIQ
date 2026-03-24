@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -57,5 +58,15 @@ public class UserActionController {
 
         return ResponseEntity.ok(
                 userActionService.getCollabSent(currentUser.getId(), page, size));
+    }
+
+    @GetMapping("/block/{userId}")
+    public ResponseEntity<?> blockUser(@PathVariable String userId) throws ResponseStatusException {
+        UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
+        if(currentUser==null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
+        if(currentUser.getId().equals(userId)) throw  new ResponseStatusException(HttpStatus.BAD_REQUEST,"Cannot block yoursef");
+
+        return ResponseEntity.ok(userActionService.blockUser(currentUser.getId(),userId));
+
     }
 }

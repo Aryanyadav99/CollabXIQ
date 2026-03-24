@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.*;
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -153,6 +155,41 @@ public class UserActionServiceImpl implements UserActionService {
                 .sorted(Comparator.comparing(dto ->
                         dto.getActionType().equals("SUPER_COLLAB") ? 0 : 1))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String,String> blockUser(String id, String userId) {
+        User fromUser= userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
+        User toUser= userRepository.findById(userId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
+        boolean isBlocked=userActionRepository.existsByFromUser_IdAndToUser_IdAndActionType(
+                id,userId, ActionType.BLOCK
+        );
+        if(isBlocked){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Already Blocked");
+        }
+        UserAction blockAction;
+        Optional<UserAction> fromUserAction = userActionRepository.findByFromUser_IdAndToUser_Id(id,userId);
+        Optional<UserAction> toUserAction=userActionRepository.findByFromUser_IdAndToUser_Id(userId,id);
+
+        if(fromUserAction.isPresent()){
+            blockAction=fromUserAction.get();
+        }
+        else{
+            blockAction=new UserAction();
+            blockAction.setFromUser(fromUser);
+            blockAction.setToUser(toUser);
+        }
+        blockAction.setActionType(ActionType.BLOCK);
+        blockAction.setMessage(null); // clear the message if any
+        userActionRepository.save(blockAction);
+        // Reset the action of another person to COLLAB if it was MATCHED
+        toUserAction.ifPresent(action -> {
+            if (action.getActionType() == ActionType.MATCHED) {
+                action.setActionType(ActionType.COLLAB);
+                userActionRepository.save(action);
+            }
+        });
+        return Map.of("message", "User blocked successfully");
     }
 
     private boolean checkMatch(String fromUserId, String toUserId) {
