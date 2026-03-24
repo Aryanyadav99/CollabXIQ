@@ -1,11 +1,10 @@
 package com.collabskill.collabxskill.Service;
 
 
-import com.collabskill.collabxskill.Entities.UserProfile;
-import com.collabskill.collabxskill.Service.extra.CollabReceivedDTO;
+import com.collabskill.collabxskill.io.CollabReceivedDTO;
+import com.collabskill.collabxskill.io.UserProfileDTO;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.Map;
 
 public interface UserActionService {
@@ -20,4 +19,5 @@ public interface UserActionService {
     Map<String,String> unBlockUser(String id, String userId);
 
 
+    Page<UserProfileDTO> getYourMathces(String id, int page, int size);
 }

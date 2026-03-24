@@ -29,7 +29,7 @@ public interface UserActionRepository extends JpaRepository<UserAction, Long> {
 
     Page<UserAction> findByFromUser_IdAndActionTypeIn(String userId, List<ActionType> collab, Pageable pageable);
 
-    List<UserAction> findByFromUser_IdAndActionType(String id, ActionType actionType);
+    Page<UserAction> findByFromUser_IdAndActionType(String id, ActionType actionType,Pageable pageable);
 
     List<UserAction> findByToUser_IdAndActionType(String id, ActionType actionType);
 

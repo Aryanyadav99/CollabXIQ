@@ -1,18 +1,15 @@
 package com.collabskill.collabxskill.Contoller;
 
-import com.collabskill.collabxskill.Service.ServiceImpl.UserServiceImpl;
 import com.collabskill.collabxskill.Service.UserProfileService;
 import com.collabskill.collabxskill.Service.UserService;
 import com.collabskill.collabxskill.extra.Constants;
-import com.collabskill.collabxskill.extra.UserProfileDTO;
+import com.collabskill.collabxskill.io.UserProfileDTO;
 import com.collabskill.collabxskill.io.UserResponseDTO;
 import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;

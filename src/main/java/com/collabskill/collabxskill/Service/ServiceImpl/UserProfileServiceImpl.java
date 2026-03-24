@@ -4,6 +4,7 @@ import com.collabskill.collabxskill.Entities.User;
 import com.collabskill.collabxskill.Entities.UserProfile;
 import com.collabskill.collabxskill.Service.UserProfileService;
 import com.collabskill.collabxskill.extra.*;
+import com.collabskill.collabxskill.io.UserProfileDTO;
 import com.collabskill.collabxskill.repo.UserActionRepository;
 import com.collabskill.collabxskill.repo.UserProfileRepo;
 import com.collabskill.collabxskill.repo.UserRepository;
@@ -23,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 

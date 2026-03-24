@@ -4,13 +4,11 @@ import com.collabskill.collabxskill.Entities.User;
 import com.collabskill.collabxskill.Entities.UserAction;
 import com.collabskill.collabxskill.Entities.UserProfile;
 import com.collabskill.collabxskill.Service.UserActionService;
-import com.collabskill.collabxskill.Service.extra.CollabReceivedDTO;
+import com.collabskill.collabxskill.io.CollabReceivedDTO;
 import com.collabskill.collabxskill.extra.ActionType;
-import com.collabskill.collabxskill.extra.UserProfileDTO;
-import com.collabskill.collabxskill.io.UserResponseDTO;
+import com.collabskill.collabxskill.io.UserProfileDTO;
 import com.collabskill.collabxskill.repo.UserActionRepository;
 import com.collabskill.collabxskill.repo.UserRepository;
-import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -18,21 +16,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.*;
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +30,8 @@ public class UserActionServiceImpl implements UserActionService {
     private final UserRepository userRepository;
     private final UserActionRepository userActionRepository;
     private final ModelMapper  modelMapper;
+
+
     @Override
     public Map<String, String> handleSwipeAction(String fromUserId, String toUserId, String actionType, String message) {
         User fromUser = userRepository.findById(fromUserId).orElseThrow(() -> new RuntimeException("User not found"));
@@ -110,6 +102,8 @@ public class UserActionServiceImpl implements UserActionService {
         return Map.of("message", action + " successful");
     }
 
+
+
     @Override
     public Page<CollabReceivedDTO> getCollabReceived(String userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size,
@@ -131,6 +125,11 @@ public class UserActionServiceImpl implements UserActionService {
             return dto;
         });
     }
+
+
+
+
+
     @Override
     public Page<CollabReceivedDTO> getCollabSent(String userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size,
@@ -152,6 +151,9 @@ public class UserActionServiceImpl implements UserActionService {
             return dto;
         });
     }
+
+
+
 
     @Override
     public Map<String,String> blockUser(String id, String userId) {
@@ -188,6 +190,10 @@ public class UserActionServiceImpl implements UserActionService {
         return Map.of("message", "User blocked successfully");
     }
 
+
+
+
+
     @Override
     public Map<String, String> unBlockUser(String id, String userId) {
         User currentUser= userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
@@ -206,7 +212,7 @@ public class UserActionServiceImpl implements UserActionService {
 
 
         Optional<UserAction> theirAction = userActionRepository
-                .findByFromUser_IdAndToUser_Id(id, userId);
+                .findByFromUser_IdAndToUser_Id(userId, id);
 
         theirAction.ifPresent(action -> {
             action.setActionType(ActionType.MATCHED);
@@ -214,6 +220,25 @@ public class UserActionServiceImpl implements UserActionService {
         });
 
         return Map.of("message", "User unblocked successfully");
+    }
+
+
+
+
+    @Override
+    public Page<UserProfileDTO> getYourMathces(String id, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<UserAction> actions = userActionRepository
+                .findByFromUser_IdAndActionType(
+                        id,
+                        ActionType.MATCHED,
+                        pageable);
+
+        return actions.map(action -> {
+            UserProfile profile = action.getToUser().getUserProfile();
+            return modelMapper.map(profile, UserProfileDTO.class);
+        });
     }
 
     private boolean checkMatch(String fromUserId, String toUserId) {

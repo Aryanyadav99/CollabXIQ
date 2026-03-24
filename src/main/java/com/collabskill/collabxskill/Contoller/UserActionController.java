@@ -2,10 +2,13 @@ package com.collabskill.collabxskill.Contoller;
 
 import com.collabskill.collabxskill.Entities.UserAction;
 import com.collabskill.collabxskill.Service.UserActionService;
+import com.collabskill.collabxskill.io.CollabReceivedDTO;
+import com.collabskill.collabxskill.io.UserProfileDTO;
 import com.collabskill.collabxskill.io.UserResponseDTO;
 import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,33 +35,29 @@ public class UserActionController {
         return null;
     }
     @GetMapping("/received")
-    public ResponseEntity<?> getCollabReceived(
+    public Page<CollabReceivedDTO> getCollabReceived(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Login First");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First") ;
         }
 
-        return ResponseEntity.ok(
-                userActionService.getCollabReceived(currentUser.getId(), page, size));
+        return userActionService.getCollabReceived(currentUser.getId(), page, size);
     }
 
     @GetMapping("/sent")
-    public ResponseEntity<?> getCollabSent(
+    public Page<CollabReceivedDTO> getCollabSent(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Login First");
+            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First") ;
         }
 
-        return ResponseEntity.ok(
-                userActionService.getCollabSent(currentUser.getId(), page, size));
+        return userActionService.getCollabSent(currentUser.getId(), page, size);
     }
 
     @GetMapping("/block/{userId}")
@@ -79,12 +78,12 @@ public class UserActionController {
     }
 
     @GetMapping("/matches")
-    public ResponseEntity<?> getMatches(@RequestParam(defaultValue = "0")int page,
-                                        @RequestParam(defaultValue = "10") int size){
+    public Page<UserProfileDTO> getMatches(@RequestParam(defaultValue = "0")int page,
+                                           @RequestParam(defaultValue = "10") int size){
         UserResponseDTO userResponseDTO=securityUtil.getCurrentUserDto();
         if(userResponseDTO==null){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
         }
-        return ResponseEntity.ok(userActionService.getYourMathces(userResponseDTO.getId(),page,size));
+        return userActionService.getYourMathces(userResponseDTO.getId(),page,size);
     }
 }

@@ -1,7 +1,7 @@
 package com.collabskill.collabxskill.Service;
 
 import com.collabskill.collabxskill.Entities.UserProfile;
-import com.collabskill.collabxskill.extra.UserProfileDTO;
+import com.collabskill.collabxskill.io.UserProfileDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

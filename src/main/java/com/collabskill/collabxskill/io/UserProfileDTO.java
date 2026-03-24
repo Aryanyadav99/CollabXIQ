@@ -1,4 +1,4 @@
-package com.collabskill.collabxskill.extra;
+package com.collabskill.collabxskill.io;
 
 import lombok.Data;
 

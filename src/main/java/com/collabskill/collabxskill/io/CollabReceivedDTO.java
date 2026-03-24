@@ -1,6 +1,5 @@
-package com.collabskill.collabxskill.Service.extra;
+package com.collabskill.collabxskill.io;
 
-import com.collabskill.collabxskill.extra.UserProfileDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
