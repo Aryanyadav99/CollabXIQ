@@ -5,6 +5,7 @@ import com.collabskill.collabxskill.Service.UserActionService;
 import com.collabskill.collabxskill.io.UserResponseDTO;
 import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +69,11 @@ public class UserActionController {
 
         return ResponseEntity.ok(userActionService.blockUser(currentUser.getId(),userId));
 
+    }
+
+    public ResponseEntity<?> unBlockUser(@PathVariable String userId){
+        UserResponseDTO currentUser=securityUtil.getCurrentUserDto();
+        if(currentUser==null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
+        return ResponseEntity.ok(userActionService.unBlockUser(currentUser.getId(),userId));
     }
 }

@@ -14,4 +14,6 @@ public interface UserActionService {
     List<CollabReceivedDTO>  getCollabSent(String id, int page, int size);
 
     Map<String,String> blockUser(String id, String userId);
+
+    Map<String,String> unBlockUser(String id, String userId);
 }

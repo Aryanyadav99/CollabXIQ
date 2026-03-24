@@ -192,6 +192,34 @@ public class UserActionServiceImpl implements UserActionService {
         return Map.of("message", "User blocked successfully");
     }
 
+    @Override
+    public Map<String, String> unBlockUser(String id, String userId) {
+        User currentUser= userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
+        User toUser= userRepository.findById(userId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
+        boolean blocked = userActionRepository.existsByFromUser_IdAndToUser_IdAndActionType(id,userId,ActionType.BLOCK);
+        if(!blocked){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User is not blocked");
+        }
+        Optional<UserAction> blockAction = userActionRepository
+                .findByFromUser_IdAndToUser_Id(id, userId);
+
+        blockAction.ifPresent(action -> {
+            action.setActionType(ActionType.MATCHED);
+            userActionRepository.save(action);
+        });
+
+
+        Optional<UserAction> theirAction = userActionRepository
+                .findByFromUser_IdAndToUser_Id(id, userId);
+
+        theirAction.ifPresent(action -> {
+            action.setActionType(ActionType.MATCHED);
+            userActionRepository.save(action);
+        });
+
+        return Map.of("message", "User unblocked successfully");
+    }
+
     private boolean checkMatch(String fromUserId, String toUserId) {
 
         // Kya samne wale ne bhi COLLAB ya SUPER_COLLAB kiya hai?
