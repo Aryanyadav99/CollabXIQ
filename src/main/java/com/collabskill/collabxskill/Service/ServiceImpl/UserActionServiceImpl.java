@@ -272,5 +272,83 @@ public class UserActionServiceImpl implements UserActionService {
 
         return false; // wait for response :
     }
+    @Override
+    public Map<String, String> acceptCollab(String currentUserId, String fromUserId) {
 
+        boolean collabExists = userActionRepository
+                .existsByFromUser_IdAndToUser_IdAndActionTypeIn(
+                        fromUserId, currentUserId,
+                        List.of(ActionType.COLLAB, ActionType.SUPER_COLLAB));
+
+        if (!collabExists) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "No collab request found");
+        }
+
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found"));
+
+        User fromUser = userRepository.findById(fromUserId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found"));
+
+        // Current user ka action save karo
+        Optional<UserAction> myAction = userActionRepository
+                .findByFromUser_IdAndToUser_Id(currentUserId, fromUserId);
+
+        UserAction action;
+        if (myAction.isPresent()) {
+            action = myAction.get();
+        } else {
+            action = new UserAction();
+            action.setFromUser(currentUser);
+            action.setToUser(fromUser);
+        }
+        action.setActionType(ActionType.COLLAB);
+        userActionRepository.save(action);
+
+        // checkMatch call karo
+        checkMatch(currentUserId, fromUserId);
+
+        return Map.of("message", "Collab accepted — MATCHED !");
+    }
+
+    @Override
+    public Map<String, String> rejectCollab(String currentUserId, String fromUserId) {
+
+        boolean collabExists = userActionRepository
+                .existsByFromUser_IdAndToUser_IdAndActionTypeIn(
+                        fromUserId, currentUserId,
+                        List.of(ActionType.COLLAB, ActionType.SUPER_COLLAB));
+
+        if (!collabExists) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "No collab request found");
+        }
+
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found"));
+
+        User fromUser = userRepository.findById(fromUserId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found"));
+
+        Optional<UserAction> myAction = userActionRepository
+                .findByFromUser_IdAndToUser_Id(currentUserId, fromUserId);
+
+        UserAction action;
+        if (myAction.isPresent()) {
+            action = myAction.get();
+        } else {
+            action = new UserAction();
+            action.setFromUser(currentUser);
+            action.setToUser(fromUser);
+        }
+        action.setActionType(ActionType.REJECT);
+        userActionRepository.save(action);
+
+        return Map.of("message", "Collab rejected");
+    }
 }

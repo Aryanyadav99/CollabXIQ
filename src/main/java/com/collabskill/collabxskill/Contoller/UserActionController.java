@@ -86,4 +86,28 @@ public class UserActionController {
         }
         return userActionService.getYourMathces(userResponseDTO.getId(),page,size);
     }
+
+    @PostMapping("/{fromUserId}/accept")
+    public ResponseEntity<?> acceptCollab(@PathVariable String fromUserId) {
+
+        UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
+        if (currentUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login First");
+        }
+
+        return ResponseEntity.ok(
+                userActionService.acceptCollab(currentUser.getId(), fromUserId));
+    }
+
+    @PostMapping("/{fromUserId}/reject")
+    public ResponseEntity<?> rejectCollab(@PathVariable String fromUserId) {
+
+        UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
+        if (currentUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login First");
+        }
+
+        return ResponseEntity.ok(
+                userActionService.rejectCollab(currentUser.getId(), fromUserId));
+    }
 }

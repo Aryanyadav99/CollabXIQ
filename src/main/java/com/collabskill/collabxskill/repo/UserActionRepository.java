@@ -34,4 +34,6 @@ public interface UserActionRepository extends JpaRepository<UserAction, Long> {
     List<UserAction> findByToUser_IdAndActionType(String id, ActionType actionType);
 
     List<UserAction> findByFromUser_Id(String id);
+
+    List<UserAction> findByFromUser_IdAndActionType(String id, ActionType actionType);
 }

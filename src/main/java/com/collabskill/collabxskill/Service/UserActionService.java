@@ -20,4 +20,8 @@ public interface UserActionService {
 
 
     Page<UserProfileDTO> getYourMathces(String id, int page, int size);
+
+    Map<String, String> acceptCollab(String currentUserId, String fromUserId);
+
+    Map<String, String> rejectCollab(String currentUserId, String fromUserId);
 }
