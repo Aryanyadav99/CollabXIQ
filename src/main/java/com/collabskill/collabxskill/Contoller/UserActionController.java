@@ -39,7 +39,7 @@ public class UserActionController {
         UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Login karo pehle");
+                    .body("Login First");
         }
 
         return ResponseEntity.ok(
@@ -71,9 +71,20 @@ public class UserActionController {
 
     }
 
+    @GetMapping("/unblock/{userId}")
     public ResponseEntity<?> unBlockUser(@PathVariable String userId){
         UserResponseDTO currentUser=securityUtil.getCurrentUserDto();
         if(currentUser==null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
         return ResponseEntity.ok(userActionService.unBlockUser(currentUser.getId(),userId));
+    }
+
+    @GetMapping("/matches")
+    public ResponseEntity<?> getMatches(@RequestParam(defaultValue = "0")int page,
+                                        @RequestParam(defaultValue = "10") int size){
+        UserResponseDTO userResponseDTO=securityUtil.getCurrentUserDto();
+        if(userResponseDTO==null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
+        }
+        return ResponseEntity.ok(userActionService.getYourMathces(userResponseDTO.getId(),page,size));
     }
 }
