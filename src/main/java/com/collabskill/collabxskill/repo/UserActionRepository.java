@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +26,10 @@ public interface UserActionRepository extends JpaRepository<UserAction, Long> {
     List<UserAction> findByToUser_IdAndActionTypeIn(String userId, List<ActionType> collab, PageRequest of);
 
     List<UserAction> findByFromUser_IdAndActionTypeIn(String userId, List<ActionType> collab, PageRequest of);
+
+    List<UserAction> findByFromUser_IdAndActionType(String id, ActionType actionType);
+
+    List<UserAction> findByToUser_IdAndActionType(String id, ActionType actionType);
+
+    List<UserAction> findByFromUser_Id(String id);
 }

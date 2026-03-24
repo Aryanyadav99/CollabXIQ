@@ -3,10 +3,8 @@ package com.collabskill.collabxskill.Service.ServiceImpl;
 import com.collabskill.collabxskill.Entities.User;
 import com.collabskill.collabxskill.Entities.UserProfile;
 import com.collabskill.collabxskill.Service.UserProfileService;
-import com.collabskill.collabxskill.extra.ExperienceLevel;
-import com.collabskill.collabxskill.extra.Gender;
-import com.collabskill.collabxskill.extra.PrimaryDomain;
-import com.collabskill.collabxskill.extra.UserProfileDTO;
+import com.collabskill.collabxskill.extra.*;
+import com.collabskill.collabxskill.repo.UserActionRepository;
 import com.collabskill.collabxskill.repo.UserProfileRepo;
 import com.collabskill.collabxskill.repo.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +25,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,6 +35,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserRepository userRepository;
     private final UserProfileRepo userProfileRepository;
     private final ModelMapper modelMapper;
+    private final UserActionRepository userActionRepository;
     @Override
     public void saveUserProfileWithRandomImage(UserProfile profile) throws IOException {
 
@@ -101,20 +102,45 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public List<UserProfileDTO> getOtherProfiles(String id, int limit) {
-        Optional<UserProfile> profile=userProfileRepository.findByUserId(id);
-        if(profile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Create your profile first to explore others");
-        }
-        List<UserProfile> allProfiles = userProfileRepository.findAll();
-        return allProfiles.stream()
-                .filter(p -> !p.getUser().getId().equals(id))
-                // TODO: filter block user — UserAction module ke baad
-                // TODO: filter friends — UserAction module ke baad
-                .sorted(Comparator.comparingDouble(other ->
-                        -calculateScore(profile, other)))
-                .limit(limit)
-                .map(profiles -> modelMapper.map(profiles, UserProfileDTO.class))
-                .collect(Collectors.toList());
+            Optional<UserProfile> profile = userProfileRepository.findByUser_Id(id);
+            if (profile.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Create your profile first to explore others");
+            }
+
+            // Blocked users ki list
+            List<String> blockedByMe = userActionRepository
+                    .findByFromUser_IdAndActionType(id, ActionType.BLOCK)
+                    .stream()
+                    .map(action -> action.getToUser().getId())
+                    .toList();
+
+            // Bloked by Me
+            List<String> blockedMe = userActionRepository
+                    .findByToUser_IdAndActionType(id, ActionType.BLOCK)
+                    .stream()
+                    .map(action -> action.getFromUser().getId())
+                    .toList();
+
+            // Already interacted
+            List<String> alreadyActed = userActionRepository
+                    .findByFromUser_Id(id)
+                    .stream()
+                    .map(action -> action.getToUser().getId())
+                    .toList();
+
+            List<UserProfile> allProfiles = userProfileRepository.findAll();
+
+            return allProfiles.stream()
+                    .filter(p -> !p.getUser().getId().equals(id))
+                    .filter(p -> !blockedByMe.contains(p.getUser().getId()))
+                    .filter(p -> !blockedMe.contains(p.getUser().getId()))
+                    .filter(p -> !alreadyActed.contains(p.getUser().getId()))
+                    .sorted(Comparator.comparingDouble(other ->
+                            -calculateScore(profile, other)))
+                    .limit(limit)
+                    .map(profiles -> modelMapper.map(profiles, UserProfileDTO.class))
+                    .collect(toList());
     }
 
     private double calculateScore(Optional<UserProfile> current1, UserProfile other) {
