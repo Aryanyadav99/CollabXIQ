@@ -17,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/user-actinos")
+@RequestMapping("/api/user-actions")
 @RequiredArgsConstructor
 public class UserActionController {
     private final SecurityUtil securityUtil;
@@ -25,14 +25,14 @@ public class UserActionController {
 
     @PostMapping("/{toUserId}")
     public ResponseEntity<?> swipeAction(@PathVariable String toUserId,
-                                         @RequestParam String Action,
+                                         @RequestParam String actionType,
                                          @RequestParam(required = false) String message){
         UserResponseDTO userResponseDTO=securityUtil.getCurrentUserDto();
         if(userResponseDTO==null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login First");
         }
-        Map<String,String>response=userActionService.handleSwipeAction(userResponseDTO.getId(),toUserId,Action,message);
-        return null;
+        Map<String,String>response=userActionService.handleSwipeAction(userResponseDTO.getId(),toUserId,actionType,message);
+        return ResponseEntity.ok(response);
     }
     @GetMapping("/received")
     public Page<CollabReceivedDTO> getCollabReceived(
@@ -60,7 +60,7 @@ public class UserActionController {
         return userActionService.getCollabSent(currentUser.getId(), page, size);
     }
 
-    @GetMapping("/block/{userId}")
+    @PostMapping("/block/{userId}")
     public ResponseEntity<?> blockUser(@PathVariable String userId) throws ResponseStatusException {
         UserResponseDTO currentUser = securityUtil.getCurrentUserDto();
         if(currentUser==null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
@@ -70,7 +70,7 @@ public class UserActionController {
 
     }
 
-    @GetMapping("/unblock/{userId}")
+    @PostMapping("/unblock/{userId}")
     public ResponseEntity<?> unBlockUser(@PathVariable String userId){
         UserResponseDTO currentUser=securityUtil.getCurrentUserDto();
         if(currentUser==null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Login First");
