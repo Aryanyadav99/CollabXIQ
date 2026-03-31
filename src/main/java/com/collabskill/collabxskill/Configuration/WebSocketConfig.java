@@ -21,7 +21,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat").setAllowedOriginPatterns(url) // for allowing cross-origin requests from the frontend
+        registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*") // for allowing cross-origin requests from the frontend // for test allow all
                 .addInterceptors(new JwtHandshakeInterceptor(jwtUtil))  // for security checking during handshake
                 .withSockJS(); // for older browsers that don't support WebSockets it try to solve using sse
     }

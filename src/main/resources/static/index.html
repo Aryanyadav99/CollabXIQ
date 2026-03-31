@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat Test</title>
+</head>
+<body>
+
+<h2>WebSocket Chat Test</h2>
+
+<input id="sender" placeholder="Sender ID" value="1" />
+<input id="receiver" placeholder="Receiver ID" value="2" />
+<input id="message" placeholder="Message" />
+<button onclick="sendMessage()">Send</button>
+
+<ul id="chat"></ul>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS("http://localhost:8081/ws-chat");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+            console.log("✅ CONNECTED SUCCESSFULLY");
+
+            // 🔥 IMPORTANT FIX: subscribe to your own ID
+            const myId = document.getElementById("sender").value;
+
+            console.log("📡 Subscribing to:", "/topic/" + myId);
+
+            stompClient.subscribe("/topic/" + myId, function (msg) {
+                const message = JSON.parse(msg.body);
+                addMessage("RECEIVED: " + message.content);
+            });
+
+        }, function (error) {
+            console.log("❌ CONNECTION FAILED", error);
+        });
+    }
+
+    function sendMessage() {
+        const sender = document.getElementById("sender").value;
+        const receiver = document.getElementById("receiver").value;
+        const content = document.getElementById("message").value;
+
+        const msg = {
+            senderId: sender,
+            receiverId: receiver,
+            content: content
+        };
+
+        stompClient.send("/app/send", {}, JSON.stringify(msg));
+
+        // optimistic UI
+        addMessage("SENT: " + content);
+    }
+
+    function addMessage(text) {
+        const li = document.createElement("li");
+        li.innerText = text;
+        document.getElementById("chat").appendChild(li);
+    }
+
+    connect();
+</script>
+
+</body>
+</html>
