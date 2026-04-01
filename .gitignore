@@ -3,7 +3,7 @@ CODE_SNIPPETS.md
 LEARNING_GUIDE.md
 uploads
 target/
-
+.env
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
