@@ -20,11 +20,9 @@ public class AuthCookieUtil {
     public void setRefreshTokenCookie(HttpServletResponse response,String refreshToken){
         Cookie cookie=new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        // need to see if this should be /api/users or just /
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(refreshCookieMaxAge);
-
         cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
@@ -33,10 +31,10 @@ public class AuthCookieUtil {
     public void setAccessTokenCookie(HttpServletResponse response, String accessToken){
         Cookie cookie =new Cookie("accessToken", accessToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(accessCookieMaxAge);
-        cookie.setAttribute("SameSite","None");
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 
@@ -46,15 +44,15 @@ public class AuthCookieUtil {
        Cookie access=new Cookie("accessToken", null);
         access.setMaxAge(0);
         access.setHttpOnly(true);
-        access.setSecure(false);
+        access.setSecure(true);
         access.setPath("/");
-        access.setAttribute("SameSite", cookieSameSiteAttribute);
+        access.setAttribute("SameSite", "None");
 
         Cookie refresh = new Cookie("refreshToken", null);
         refresh.setMaxAge(0);
         refresh.setHttpOnly(true);
-        refresh.setSecure(false);
-        refresh.setPath("/api/users");
+        refresh.setSecure(true);
+        refresh.setPath("/");
         refresh.setAttribute("SameSite", "None");
 
         response.addCookie(access);
