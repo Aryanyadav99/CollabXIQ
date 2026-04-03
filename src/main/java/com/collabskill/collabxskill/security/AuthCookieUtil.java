@@ -19,24 +19,24 @@ public class AuthCookieUtil {
 
     public void setRefreshTokenCookie(HttpServletResponse response,String refreshToken){
         Cookie cookie=new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setSecure(false);
         // need to see if this should be /api/users or just /
         cookie.setPath("/");
         cookie.setMaxAge(refreshCookieMaxAge);
 
-        cookie.setAttribute("SameSite", cookieSameSiteAttribute);
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 
     String cookieSameSiteAttribute = Constants.SAME_SITE_ATTRIBUTE;
     public void setAccessTokenCookie(HttpServletResponse response, String accessToken){
         Cookie cookie =new Cookie("accessToken", accessToken);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(accessCookieMaxAge);
-        cookie.setAttribute("SameSite", cookieSameSiteAttribute);
+        cookie.setAttribute("SameSite","None");
         response.addCookie(cookie);
     }
 
@@ -55,7 +55,7 @@ public class AuthCookieUtil {
         refresh.setHttpOnly(true);
         refresh.setSecure(false);
         refresh.setPath("/api/users");
-        refresh.setAttribute("SameSite", cookieSameSiteAttribute);
+        refresh.setAttribute("SameSite", "None");
 
         response.addCookie(access);
         response.addCookie(refresh);
