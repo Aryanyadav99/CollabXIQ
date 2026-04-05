@@ -139,7 +139,11 @@ public class UserProfileServiceImpl implements UserProfileService {
                     .sorted(Comparator.comparingDouble(other ->
                             -calculateScore(profile, other)))
                     .limit(limit)
-                    .map(profiles -> modelMapper.map(profiles, UserProfileDTO.class))
+                    .map(p -> {
+                        UserProfileDTO dto = modelMapper.map(p, UserProfileDTO.class);
+                        dto.setId(p.getUser().getId()); // User ka id set karo
+                        return dto;
+                    })
                     .collect(toList());
     }
 
