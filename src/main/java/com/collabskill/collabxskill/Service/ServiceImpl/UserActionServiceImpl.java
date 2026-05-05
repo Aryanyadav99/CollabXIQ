@@ -122,6 +122,7 @@ public class UserActionServiceImpl implements UserActionService {
             dto.setActionType(action.getActionType().name());
             dto.setMessage(action.getMessage());
             dto.setCreatedAt(action.getCreatedAt());
+            dto.setUserid(action.getFromUser().getId());
             return dto;
         });
     }

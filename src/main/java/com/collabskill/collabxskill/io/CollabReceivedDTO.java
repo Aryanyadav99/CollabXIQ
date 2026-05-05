@@ -11,4 +11,5 @@ public class CollabReceivedDTO {
     private String actionType;   // COLLAB ya SUPER_COLLAB
     private String message;      // only for SuperCollab
     private LocalDateTime createdAt;
+    private String userid;
 }
