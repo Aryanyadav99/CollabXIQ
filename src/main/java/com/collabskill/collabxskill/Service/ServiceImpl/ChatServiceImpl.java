@@ -8,6 +8,7 @@ import com.collabskill.collabxskill.extra.Constants;
 import com.collabskill.collabxskill.io.ChatMessageDTO;
 import com.collabskill.collabxskill.repo.ChatRepo;
 import com.collabskill.collabxskill.repo.UserProfileRepo;
+import com.collabskill.collabxskill.repo.UserRepository;
 import com.collabskill.collabxskill.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -33,7 +34,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRepo chatRepo;
     private final SimpMessagingTemplate messagingTemplate;
     private final SecurityUtil securityUtil;
-
+    private final UserRepository userRepo;
     @Override
     public void sendMessage(ChatMessageDTO messageDTO, Message<?> stompMessage) {
 
@@ -51,12 +52,20 @@ public class ChatServiceImpl implements ChatService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-// always trust backend
+        String originalReceiverId = message.getReceiverId();
+
         message.setSenderId(currentUserId);
+        String normalizedReceiverId =
+                normalizeToUserId(message.getReceiverId());
+
+        message.setReceiverId(normalizedReceiverId);
 
         ChatMessage save = chatRepo.save(message);
 
-        messagingTemplate.convertAndSend("/topic/" + message.getReceiverId(), save);
+        messagingTemplate.convertAndSend("/topic/" + originalReceiverId, save);
+        System.out.println(
+                "Sending to topic: /topic/" + message.getReceiverId()
+        );
         //NOTE: "Send message only to receiver via WebSocket, sender sees it instantly through frontend optimistic UI update"
     }
 
@@ -64,21 +73,46 @@ public class ChatServiceImpl implements ChatService {
     public Page<ChatMessageDTO> getHistory(String user1, String user2, int page, int size) {
         User currentUser = securityUtil.getCurrentUser();
 
-        if (!currentUser.getId().equals(user1) && !currentUser.getId().equals(user2)) {
+        if (!currentUser.getId().equals(user1)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, Constants.ACCESS_DENIED);
         }
+        String normalizedUser2 =
+                normalizeToUserId(user2);
 
-        Optional<UserProfile> targetProfile = userProfileRepository.findById(user2);
-        if (targetProfile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User profile not found");
-        }
 
-        User toUser = targetProfile.get().getUser();
-        user2 = (toUser.getId());
-
-        Page<ChatMessage> chatMessages = chatRepo.findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(user1, user2,
-                user1, user2, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp")));
+        Page<ChatMessage> chatMessages =
+                chatRepo.getChatMessages(
+                        user1,
+                        normalizedUser2,
+                        PageRequest.of(
+                                page,
+                                size,
+                                Sort.by(
+                                        Sort.Order.asc("timestamp"),
+                                        Sort.Order.asc("id")
+                                )
+                        )
+                );
 
         return chatMessages.map(msg -> modelMapper.map(msg, ChatMessageDTO.class));
+    }
+    private String normalizeToUserId(String incomingId) {
+
+        // agar already userId hai
+        if (userRepo.existsById(incomingId)) {
+            return incomingId;
+        }
+
+        // warna profileId hoga
+        UserProfile profile = userProfileRepository
+                .findById(incomingId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Not found"
+                        )
+                );
+
+        return profile.getUser().getId();
     }
 }
